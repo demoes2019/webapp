@@ -1,0 +1,22 @@
+FROM zavierdockerhub/ai
+
+WORKDIR /root
+
+COPY qemu-aarch64-static /usr/bin/
+
+RUN apt-get update && apt-get install python-pip -y
+
+COPY /* /root/dcca/webapp/
+
+RUN ls /root/dcca/webapp && \
+    cd /root/dcca/webapp && pip install -r requirements.txt && \
+    cd /root/dcca && ln -sf /root/dcca/webapp/images images
+
+RUN apt-get install python-gevent openssh-client vim -y
+
+COPY index.html /root/dcca/webapp/
+COPY index.html /root/dcca/webapp/templates/
+
+WORKDIR /root/dcca/webapp
+
+ENTRYPOINT ["gunicorn","-c","dcca-ai.conf","application:app"]
